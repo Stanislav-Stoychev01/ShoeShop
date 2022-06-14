@@ -2,22 +2,20 @@
 <div id="app" class="container my-5">
   <h1>My Online Shoe Shop</h1>
   <div class="SearchMenuButton">
-    <SearchMenuButton
-    :current-page="currentPage"
-    :filter-out="filter"
-    @changedText = "filter = $event"
-    @buttonClicked = "axiosGet(); currentPage = 1"/>
+    <SearchMenuButton/>
   </div>
   <div class="row">
     <ShoeCardComponent
       v-for="shoes in availableShoes"
       :key = "shoes.id"
+      :id = "shoes.id"
       :brand ="shoes.brand"
       :model ="shoes.model"
       :color ="shoes.color"
-      :price ="shoes.price"/>
+      :price ="shoes.price"
+      :sizes ="shoes.sizes"/>
   </div>
-  <div class="justify-content-center">
+  <div>
       <b-pagination
         v-model="currentPage"
         :total-rows="totalElements"
@@ -27,6 +25,7 @@
         next-text="⏩"
         last-text="⏭"
         class="mt-4"
+        align="center"
         @change ="ChangePageHandler">
       </b-pagination>
   </div>
@@ -35,62 +34,37 @@
 
 <script>
 import ShoeCardComponent from '@/components/ShoesComponent'
-import ShoesPagesService from '@/services/shoes-pages service'
 import SearchMenuButton from '@/components/SearchMenuButton'
 export default {
   name: 'AvailableShoes',
-  data () {
-    return {
-      totalPages: '',
-      availableShoes: [],
-      totalElements: '',
-      currentPage: 1,
-      filter: '',
-      perPage: 2
-    }
-  },
   components: {
     ShoeCardComponent: ShoeCardComponent,
     SearchMenuButton: SearchMenuButton
   },
-  methods: {
-    getRequestParameters (perPage, currentPage, filter) {
-      const parameters = {}
-      if (perPage) {
-        parameters.perPage = perPage
-      }
-      if (currentPage) {
-        parameters.currentPage = currentPage
-      }
-      if (filter) {
-        parameters.filter = filter
-      }
-      return parameters
+  computed: {
+    currentPage () { return this.$store.state.currentPage },
+    availableShoes () { return this.$store.state.availableShoes },
+    filter: {
+      get () { return this.$store.state.filter },
+      set (value) { return this.$store.commit('SET_FILTER', value) }
     },
+    perPage () { return this.$store.state.perPage },
+    totalElements () { return this.$store.state.totalElements }
+  },
+  methods: {
     ChangePageHandler (value) {
       this.currentPage = value
-      this.axiosGet()
     },
     ChangePerPageHandler (event) {
       this.perPage = event.target.value
       this.currentPage = 1
     },
-    async axiosGet () {
-      try {
-        const params = this.getRequestParameters(this.perPage, this.currentPage, this.filter)
-        const res = await ShoesPagesService.getShoePages(params)
-        this.availableShoes = res.data.availableShoes
-        this.totalElements = res.data.totalElements
-        this.totalPages = res.data.totalPages
-        this.currentPage = res.data.currentPage
-        console.log(res.data)
-      } catch (e) {
-        console.log(e)
-      }
+    redirectPage () {
+      this.$router.push('/shoe')
     }
   },
   created () {
-    this.axiosGet()
+    this.$store.dispatch('importData')
   }
 }
 </script>

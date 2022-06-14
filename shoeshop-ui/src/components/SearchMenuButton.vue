@@ -3,11 +3,10 @@
     <div class="col-md-8">
       <div class="input-group md-7">
         <input
+          v-model="filter"
           type="text"
           class="form-control"
           placeholder="Search by title"
-          :value="filterOut"
-          @input="changedText"
         />
         <div class="input-group-append">
           <button
@@ -25,22 +24,16 @@
 <script>
 export default {
   name: 'SearchMenuButton',
-  props: {
-    filterOut: { type: String, required: true },
-    currentPage: { type: Number, required: true }
-  },
-  data () {
-    return {
-      filter: ''
-    }
+  computed: {
+    filter: {
+      get () { return this.$store.state.filter },
+      set (value) { return this.$store.commit('SET_FILTER', value) }
+    },
+    currentPage () { return this.$store.state.currentPage }
   },
   methods: {
-    changedText (event) {
-      this.filter = event.target.value
-      this.$emit('changedText', this.filter)
-    },
-    ButtonClicked (event) {
-      this.$emit('buttonClicked')
+    ButtonClicked () {
+      this.$store.dispatch('importData')
     }
   }
 }

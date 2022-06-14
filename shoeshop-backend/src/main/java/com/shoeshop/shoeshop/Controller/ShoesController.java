@@ -13,10 +13,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import java.sql.Timestamp;
@@ -193,11 +195,12 @@ public class ShoesController {
         }
 
         @GetMapping("/pages")
-        public ResponseEntity<?> getMenuPages(@RequestParam(defaultValue = "2") int perPage,
+        public ResponseEntity<?> getMenuPages(@RequestParam(defaultValue = "5") int perPage,
                                               @RequestParam(defaultValue = "1") int currentPage,
                                               @RequestParam(defaultValue = "") String filter)
         {
             Pageable pageable = PageRequest.of(currentPage - 1, perPage);
+            List<Sizes> sizes = new ArrayList<>();
             Page<AvailableShoes> availableShoesPage = availableShoesRepo.
                     filterShoes(filter, pageable);
             Map<String, Object> response = new HashMap<>();
@@ -207,6 +210,14 @@ public class ShoesController {
             response.put("availableShoes", availableShoesPage.getContent());
             return ResponseEntity.ok(response);
         }
-        
+
+        @GetMapping("/findShoe")
+    public ResponseEntity<?> findShoe(@RequestParam Long id)
+        {
+            if(availableShoesRepo.findById(id).isPresent())
+                return ResponseEntity.ok(availableShoesRepo.findById(id));
+            else
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 }
 

@@ -27,7 +27,7 @@ public class AvailableShoes {
     @OneToMany(mappedBy = "availableShoes")
     private Set<Order_AvailableShoes> timestamps;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "available_shoes_sizes",
             joinColumns = @JoinColumn(name = "available_shoes_id"),
             inverseJoinColumns = @JoinColumn(name = "sizes_id")
@@ -68,5 +68,13 @@ public class AvailableShoes {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Set<Sizes> getSizes() {
+        return sizes;
+    }
+
+    public void setSizes(Set<Sizes> sizes) {
+        this.sizes = sizes;
     }
 }
